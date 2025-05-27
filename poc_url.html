@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: #121212;
+      color: #FFFFFF;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      background-color: #1A1A1A;
+      width: 375px;
+      max-width: 95vw;
+      border-radius: 20px;
+      padding: 40px 32px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .logo {
+      width: 180px;
+      margin-bottom: 20px;
+    }
+
+    .logo img {
+      width: 100%;
+      filter: brightness(0) invert(1);
+      user-select: none;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 32px;
+      line-height: 1.2;
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+      user-select: none;
+    }
+
+    p.subtitle {
+      font-weight: 400;
+      font-size: 14px;
+      color: #999999;
+      margin-bottom: 36px;
+      user-select: none;
+    }
+
+    form {
+      width: 100%;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      color: #2E72FF;
+      margin-bottom: 8px;
+      user-select: none;
+    }
+
+    .phone-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 40px;
+    }
+
+    .country-code {
+      background-color: #2E72FF;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      user-select: none;
+      min-width: 52px;
+      text-align: center;
+      line-height: 1;
+    }
+
+    input[type="tel"] {
+      flex-grow: 1;
+      padding: 8px 12px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background-color: #222222;
+      color: white;
+      user-select: text;
+      height: 40px;
+      line-height: 1.2;
+    }
+
+    input[type="tel"]::placeholder {
+      color: #666666;
+      font-weight: 500;
+    }
+
+    input[type="tel"]:focus {
+      outline: 2px solid #2E72FF;
+    }
+
+    button {
+      background-color: #2E72FF;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      padding: 14px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+      user-select: none;
+      line-height: 1;
+    }
+
+    button:hover {
+      background-color: #2358CC;
+    }
+
+    .footer-text {
+      margin-top: 48px;
+      font-size: 13px;
+      text-align: center;
+      color: #666666;
+      user-select: none;
+    }
+
+    .footer-text a {
+      color: #2E72FF;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main" aria-label="GCash mobile app login screen UI replica">
+    <div class="logo" aria-hidden="true">
+      <img src="https://www.gcash.com/wp-content/uploads/2019/07/gcash-logo.png" alt="GCash Logo" />
+    </div>
+
+    <h1>Welcome Back</h1>
+    <p class="subtitle">Sign in to continue to your GCash account</p>
+
+    <form>
+      <label for="phone">Mobile Number</label>
+      <div class="phone-input-wrapper">
+        <div class="country-code" aria-label="Country code">+63</div>
+        <input
+          id="phone"
+          type="tel"
+          placeholder="912 345 6789"
+          maxlength="10"
+          pattern="[0-9]{10}"
+          inputmode="numeric"
+          autocomplete="tel-national"
+          required
+          aria-describedby="phone-desc"
+        />
+      </div>
+
+      <button type="submit" aria-label="Next">FAKE</button>
+    </form>
+
+    <p class="footer-text" aria-live="polite" aria-atomic="true">
+      Don’t have an account? <a href="#" tabindex="0">Register now</a>
+    </p>
+  </main>
+</body>
+</html>
