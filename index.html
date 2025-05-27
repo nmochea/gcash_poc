@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <style>
     html, body {
       margin: 0;
@@ -39,12 +39,22 @@
 
     .terminal h2 {
       margin-top: 30px;
-      font-size: 2em;
+      font-size: 1.3em;
       color: #bbb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .terminal h2 img {
+      width: 24px;
+      height: 24px;
+      vertical-align: middle;
     }
 
     .prompt {
-      margin-top: -20px;
+      margin-top: -15px;
       color: #888;
       font-size: 1.5em;
     }
@@ -68,7 +78,12 @@
   <div class="terminal">
     <h1>GCash?</h1>
     <div class="prompt">Security Got Pawned!</div>
-    <h2>@nmochea</h2>
+    <h2>
+      <a href="#" target="_blank">
+        <img src="https://img.icons8.com/ios-filled/50/ff4d4d/github.png" alt="GitHub" />
+      </a>
+      @nmochea
+    </h2>
   </div>
   <div class="footer">©2025</div>
 </body>
