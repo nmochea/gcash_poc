@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #000;
+      font-family: 'Courier New', Courier, monospace;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .terminal {
+      width: 100vw;
+      height: 100vh;
+      box-sizing: border-box;
+      padding: 40px 20px;
+      background-color: #1a1a1a;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: none;
+    }
+
+    .terminal h1 {
+      margin: 0 0 20px;
+      font-size: 2em;
+      color: #ff4d4d;
+      text-shadow: 0 0 3px #ff1a1a;
+    }
+
+    .terminal h2 {
+      margin: 0;
+      font-size: 1em;
+      color: #bbb;
+    }
+
+    .prompt {
+      margin-top: 30px;
+      color: #888;
+      font-size: 1em;
+    }
+
+    .prompt::before {
+      content: "$ ";
+      color: #ff4d4d;
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <h1>GCash?</h1>
+    <h2>@nmochea</h2>
+    <div class="prompt">Security Got Pawned!</div>
+  </div>
+</body>
+</html>
