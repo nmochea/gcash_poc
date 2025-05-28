@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: #ffffff;
+    }
+
+    .header {
+      background-color: #0057e4;
+      padding: 40px 0;
+      text-align: center;
+    }
+
+    .header img {
+      width: 130px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      max-width: 360px;
+      margin: -40px auto 0;
+      background-color: white;
+      padding: 40px 32px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #000;
+      margin-bottom: 6px;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+      margin-bottom: 30px;
+    }
+
+    .input-row span {
+      color: #000;
+      font-size: 16px;
+      margin-right: 12px;
+    }
+
+    .input-row input {
+      border: none;
+      outline: none;
+      font-size: 16px;
+      flex: 1;
+    }
+
+    .input-row input::placeholder {
+      color: #aaa;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background-color: #0057e4;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 32px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: #777;
+    }
+
+    .footer a {
+      color: #0057e4;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://m.gcash.com/gcash-login-web/img/Gcash-white-new-logo.81ba859.png" alt="GCash Logo">
+  </div>
+
+  <div class="card">
+    <h2>Login to link with GCash</h2>
+    <p>Enter your mobile number.</p>
+    <div class="input-row">
+      <span>+63</span>
+      <input type="tel" placeholder="9123456787" maxlength="10">
+    </div>
+    <button class="btn">NEXT</button>
+  </div>
+
+  <div class="footer">
+    Don’t have a GCash account? <a href="#">Register now</a>
+  </div>
+</body>
+</html>
