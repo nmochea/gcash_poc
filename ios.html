@@ -1,15 +1,30 @@
+<!DOCTYPE html>
 <html>
-<script type="text/javascript">
-    var data;
-        if(window.CSJavascriptBridge) {
-            data = window.CSJavascriptBridge.getVersion();
-        }
-        if(data) {
-            document.write("flag: " + data);
-        }
-</script>
-    <br>
-<script type="text/javascript">
-    Object.getOwnPropertyNames(window).forEach(function(v){document.write(v+"<br>");});
+<head>
+    <title>Bridge Test</title>
+</head>
+<body>
+    <div id="flagOutput"></div>
+    <div id="windowProps"></div>
+
+    <script type="text/javascript">
+        (function() {
+            var data;
+            if (window.CSJavascriptBridge) {
+                data = window.CSJavascriptBridge.getVersion();
+            }
+            if (data) {
+                document.getElementById('flagOutput').textContent = "flag: " + data;
+            }
+        })();
     </script>
+
+    <script type="text/javascript">
+        (function() {
+            var props = Object.getOwnPropertyNames(window);
+            var output = props.map(p => p + "<br>").join('');
+            document.getElementById('windowProps').innerHTML = output;
+        })();
+    </script>
+</body>
 </html>
