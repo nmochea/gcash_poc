@@ -1,0 +1,11 @@
+<html>
+<script type="text/javascript">
+    var data;
+        if(window.CSJavascriptBridge) {
+            data = window.CSJavascriptBridge.getVersion();
+        }
+        if(data) {
+            document.write("flag: " + data);
+        }
+</script>
+</html>
