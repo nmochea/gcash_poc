@@ -2,23 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enhanced WebView Security Tester</title>
+    <title>Comprehensive Android WebView Security Tester</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.6;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             background-color: #f4f4f9;
             color: #333;
         }
         .container { max-width: 800px; margin: auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h1, h2, h3 { color: #d9230f; }
         h1 { text-align: center; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 5px;}
         .test-section { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 20px; }
         .test-section h3 { margin-top: 0; }
         .description { font-size: 0.9em; color: #555; margin-bottom: 10px; }
+        .impact { font-weight: bold; }
         .status {
             padding: 10px;
             border-radius: 4px;
@@ -33,87 +35,114 @@
         .status.failure { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
         .status.info { background-color: #cce5ff; color: #004085; border-color: #b8daff; }
         #start-button {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #fff;
-            background-color: #28a745;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: background-color 0.3s;
+            display: block; width: 100%; padding: 15px; font-size: 1.2em; font-weight: bold; color: #fff; background-color: #28a745;
+            border: none; border-radius: 5px; cursor: pointer; margin-bottom: 25px; transition: background-color 0.3s;
         }
         #start-button:hover { background-color: #218838; }
         video, img { max-width: 100%; border-radius: 4px; display: none; margin-top: 10px;}
         pre { background: #eee; padding: 10px; overflow-x: auto; border-radius: 4px; }
+        .note { background-color: #fff3cd; border-left: 5px solid #ffeeba; padding: 15px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🔓 Enhanced WebView Security Tester</h1>
-    <p style="text-align: center;">This tool tests for common WebView misconfigurations on Android and iOS. A "Success" result indicates a potential security vulnerability.</p>
+    <h1>🔬 Comprehensive Android WebView Security Tester</h1>
+    <div class="note">
+        <strong>Important:</strong> A <strong style="color: #155724;">"SUCCESS"</strong> status for a test indicates a <strong style="color: #d9230f;">potential security vulnerability</strong> has been found. A <strong style="color: #721c24;">"SECURE"</strong> status means the test did not find a flaw.
+    </div>
 
-    <button id="start-button" onclick="runAllTests()">▶️ Start All Tests</button>
+    <button id="start-button" onclick="runAllTests()">▶️ Start All Automated Tests</button>
 
-    <!-- Test Sections -->
+    <!-- Android Specific Tests -->
+    <h2>Android-Specific Vulnerability Tests</h2>
+    
+    <div class="test-section">
+        <h3>1. SSL/TLS Error Bypass Test</h3>
+        <p class="description">Attempts to fetch a resource from a domain with an invalid SSL certificate. <span class="impact">Impact: If successful, the app is vulnerable to Man-in-the-Middle (MITM) attacks, allowing interception of all traffic.</span> This is caused by `onReceivedSslError(handler.proceed())`.</p>
+        <div id="ssl-status" class="status">Waiting for test to start...</div>
+    </div>
 
     <div class="test-section">
-        <h3>1. Local File Access (file://)</h3>
-        <p class="description">Attempts to read sensitive local files. Success here is a critical vulnerability, often enabled by `setAllowFileAccessFromFileURLs(true)` on Android.</p>
-        <div id="file-status" class="status">Waiting for test to start...</div>
+        <h3>2. Insecure Intent Scheme (`intent://`)</h3>
+        <p class="description">Attempts to launch the main Android Settings app via an `intent://` URL. <span class="impact">Impact: If the Settings app opens, a malicious page can launch arbitrary activities, send broadcasts, or start services, leading to serious vulnerabilities.</span></p>
+        <div id="intent-status" class="status">Waiting for test to start...</div>
     </div>
     
     <div class="test-section">
-        <h3>2. Android JavascriptInterface Exploit</h3>
-        <p class="description">Tests for legacy, insecure Javascript Interfaces. If an object like "Android" or "JSInterface" is exposed, it could allow arbitrary native code execution.</p>
+        <h3>3. Local File Access (`file://`)</h3>
+        <p class="description">Attempts to read sensitive local files via `fetch()`. <span class="impact">Impact: A critical vulnerability, allowing theft of local app data or device information.</span> Enabled by `setAllowFileAccessFromFileURLs(true)` or `setAllowUniversalAccessFromFileURLs(true)`.</p>
+        <div id="file-status" class="status">Waiting for test to start...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Content Provider Access (`content://`)</h3>
+        <p class="description">Attempts to read from a standard Android Content Provider. <span class="impact">Impact: Allows theft of data shared by other apps (e.g., contacts, user dictionary).</span> Enabled by `setAllowContentAccess(true)`.</p>
+        <div id="content-status" class="status">Waiting for test to start...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>5. JavascriptInterface Exploit</h3>
+        <p class="description">Tests for insecure Javascript Interfaces. <span class="impact">Impact: Can allow a malicious page to execute native Java code, potentially leading to full device compromise.</span></p>
         <div id="jsinterface-status" class="status">Waiting for test to start...</div>
     </div>
 
     <div class="test-section">
-        <h3>3. Clipboard Access</h3>
-        <p class="description">Attempts to silently read the user's clipboard content.</p>
+        <h3>6. Mixed Content Loading</h3>
+        <p class="description">Checks if an insecure resource (HTTP) can be loaded from this secure page (HTTPS). <span class="impact">Impact: Defeats the purpose of HTTPS, allowing an attacker to inject malicious scripts or sniff data on an otherwise secure page.</span></p>
+        <div id="mixed-content-status" class="status">Waiting for test to start...</div>
+    </div>
+
+
+    <!-- General Permission Tests -->
+    <h2>General Permission & API Tests</h2>
+
+    <div class="test-section">
+        <h3>7. Clipboard Access</h3>
         <div id="clipboard-status" class="status">Waiting for test to start...</div>
     </div>
 
     <div class="test-section">
-        <h3>4. Camera Access & Capture</h3>
-        <p class="description">Requests camera access and tries to capture a photo without prolonged user interaction.</p>
+        <h3>8. Camera Access & Capture</h3>
         <div id="camera-status" class="status">Waiting for test to start...</div>
         <video id="videoPreview" autoplay playsinline></video>
         <img id="capturedImage" alt="Captured Image" />
     </div>
 
     <div class="test-section">
-        <h3>5. Microphone Access</h3>
-        <p class="description">Requests access to the microphone to check if audio can be recorded.</p>
+        <h3>9. Microphone Access</h3>
         <div id="mic-status" class="status">Waiting for test to start...</div>
     </div>
 
     <div class="test-section">
-        <h3>6. Geolocation</h3>
-        <p class="description">Attempts to fetch the device's precise GPS coordinates.</p>
+        <h3>10. Geolocation</h3>
         <div id="location-status" class="status">Waiting for test to start...</div>
     </div>
     
     <div class="test-section">
-        <h3>7. Automatic File Download</h3>
-        <p class="description">Tries to force the download of a file. This can be used for phishing or delivering malicious payloads if the WebView auto-opens files.</p>
+        <h3>11. Automatic File Download</h3>
         <div id="download-status" class="status">Waiting for test to start...</div>
     </div>
 
     <div class="test-section">
-        <h3>8. Device Fingerprinting</h3>
-        <p class="description">Collects non-permission based information to create a unique device fingerprint.</p>
+        <h3>12. Device Fingerprinting</h3>
         <pre id="deviceInfo" class="status">Waiting for test to start...</pre>
     </div>
 
-    <div style="margin-top: 30px; text-align: center; font-size: 0.8em; color: #777;">
-        <h2>Disclaimer</h2>
-        <p>This tool is for educational and authorized security testing purposes only. Do not use it on applications for which you do not have explicit permission to test.</p>
+    <!-- Manual Tests -->
+    <h2>Manual Tests (Cannot Be Automated)</h2>
+    <div class="test-section">
+        <h3>Remote Debugging (`setWebContentsDebuggingEnabled`)</h3>
+        <p class="description">This is one of the most critical misconfigurations for a production app, but it cannot be detected from JavaScript. You must test it manually.</p>
+        <p><strong>Test Steps:</strong>
+            <ol>
+                <li>Enable USB Debugging on your Android device and connect it to your computer.</li>
+                <li>Ensure you have `adb` installed and in your system's PATH.</li>
+                <li>Open Google Chrome (or any Chromium browser) on your computer.</li>
+                <li>Navigate to the address: <strong>`chrome://inspect/#devices`</strong></li>
+                <li>Look for your device. If the target application's WebView appears in the list with an "inspect" link, it is <strong>VULNERABLE</strong>. Clicking "inspect" gives you a full developer console with complete control over the WebView.</li>
+            </ol>
+        </p>
     </div>
 
 </div>
@@ -123,188 +152,163 @@
     function updateStatus(elementId, message, type) {
         const el = document.getElementById(elementId);
         el.textContent = message;
-        el.className = 'status ' + type;
+        // Map intuitive types to CSS classes
+        const typeMap = { 'success': 'success', 'vulnerable': 'success', 'secure': 'failure', 'info': 'info' };
+        el.className = 'status ' + (typeMap[type] || 'info');
     }
 
     // ### TEST FUNCTIONS ###
 
+    async function testSslBypass() {
+        const statusElId = 'ssl-status';
+        updateStatus(statusElId, 'Attempting to fetch from https://expired.badssl.com...', 'info');
+        try {
+            await fetch('https://expired.badssl.com/', { mode: 'no-cors' });
+            updateStatus(statusElId, 'VULNERABLE: The fetch request to a domain with an expired SSL certificate succeeded. The app is likely ignoring SSL errors and is vulnerable to MITM attacks.', 'vulnerable');
+        } catch (e) {
+            updateStatus(statusElId, 'SECURE: The fetch request failed as expected. The WebView correctly rejected the invalid SSL certificate.', 'secure');
+        }
+    }
+
+    function testIntentScheme() {
+        const statusElId = 'intent-status';
+        updateStatus(statusElId, 'Attempting to launch Android Settings via intent://. Observe your device screen.', 'info');
+        // This is a "fire and forget" test. JS cannot know if it succeeded.
+        window.location.href = "intent://#Intent;action=android.settings.SETTINGS;end";
+        setTimeout(() => {
+           updateStatus(statusElId, 'TEST TRIGGERED: Check if the Android Settings app opened on your device. If it did, this is a CRITICAL VULNERABILITY.', 'info');
+        }, 1000);
+    }
+    
     async function testLocalFileAccess() {
         const statusElId = 'file-status';
-        updateStatus(statusElId, 'Testing various file paths...', 'info');
-        
-        const pathsToTest = [
-            // Common Android paths
-            'file:///etc/hosts',
-            'file:///proc/version',
-            'file:///sdcard/Download/secret.txt',
-            'file:///sdcard/secret.txt',
-            'file:///data/data/com.android.browser/databases/webview.db',
-            'file:///private/var/mobile/Library/Preferences/com.apple.springboard.plist'
-        ];
-        
-        let successes = [];
-        for (const path of pathsToTest) {
-            try {
-                const response = await fetch(path);
-                if (response.ok) {
-                    const content = await response.text();
-                    successes.push(`SUCCESS: Read ${path}\nContent: ${content.substring(0, 100)}...`);
-                }
-            } catch (e) {
-                // This is expected to fail most of the time
-                console.log(`Failed to fetch ${path}:`, e.message);
-            }
+        updateStatus(statusElId, 'Testing various file:// paths...', 'info');
+        try {
+            const response = await fetch('file:///etc/hosts');
+            const content = await response.text();
+            updateStatus(statusElId, `VULNERABLE: Successfully read 'file:///etc/hosts'.\n\nContent: ${content.substring(0, 200)}...`, 'vulnerable');
+        } catch (e) {
+            updateStatus(statusElId, 'SECURE: Could not read local files using file:// protocol. The WebView appears to be correctly configured.', 'secure');
         }
+    }
 
-        if (successes.length > 0) {
-            updateStatus(statusElId, successes.join('\n\n'), 'success');
-        } else {
-            updateStatus(statusElId, 'FAILURE: Could not read any local files. The WebView is likely secure against file:// access.', 'failure');
+    async function testContentProvider() {
+        const statusElId = 'content-status';
+        updateStatus(statusElId, 'Attempting to read from content://user_dictionary/words...', 'info');
+        try {
+            const response = await fetch('content://user_dictionary/words');
+            const content = await response.text();
+            updateStatus(statusElId, `VULNERABLE: Successfully read from the User Dictionary content provider.\n\nContent: ${content.substring(0, 200)}...`, 'vulnerable');
+        } catch (e) {
+            updateStatus(statusElId, 'SECURE: Could not read from content provider. The WebView correctly blocks content:// URLs.', 'secure');
         }
     }
 
     function testAndroidJavascriptInterface() {
         const statusElId = 'jsinterface-status';
-        updateStatus(statusElId, 'Checking for common insecure interfaces...', 'info');
-        
-        const commonInterfaces = ['Android', 'JSInterface', 'WebView', 'android'];
+        const commonInterfaces = ['Android', 'JSInterface', 'WebView', 'android', 'app'];
         let findings = [];
-
         for (const iface of commonInterfaces) {
             if (typeof window[iface] === 'object' && window[iface] !== null) {
-                const methods = Object.keys(window[iface]);
-                findings.push(`SUCCESS: Found Javascript Interface named "${iface}"!\nExposed methods: ${methods.join(', ') || '[None Found]'}`);
+                try {
+                    const methods = Object.keys(window[iface]);
+                    findings.push(`VULNERABLE: Found Javascript Interface named "${iface}"!\nExposed methods: ${methods.join(', ') || '[None Found]'}`);
+                } catch (e) {
+                     findings.push(`VULNERABLE: Found Javascript Interface named "${iface}", but could not enumerate its methods (this can happen with some objects).`);
+                }
             }
         }
-
         if (findings.length > 0) {
-            updateStatus(statusElId, findings.join('\n\n'), 'success');
+            updateStatus(statusElId, findings.join('\n\n'), 'vulnerable');
         } else {
-            updateStatus(statusElId, 'FAILURE: No common insecure Javascript Interfaces were found.', 'failure');
+            updateStatus(statusElId, 'SECURE: No common insecure Javascript Interfaces were found.', 'secure');
         }
     }
 
+    function testMixedContent() {
+        const statusElId = 'mixed-content-status';
+        updateStatus(statusElId, 'Attempting to load an image from an HTTP source...', 'info');
+        const img = new Image();
+        img.onload = () => {
+            updateStatus(statusElId, 'VULNERABLE: Successfully loaded an insecure (HTTP) image on this secure (HTTPS) page. Mixed content is allowed.', 'vulnerable');
+        };
+        img.onerror = () => {
+            updateStatus(statusElId, 'SECURE: The browser correctly blocked the insecure (HTTP) image from loading on this page.', 'secure');
+        };
+        // Use a known public http image resource
+        img.src = 'http://http.badssl.com/logo.png';
+    }
+
+    // The rest of the functions from the previous version remain largely the same, just with updated messaging.
     function testClipboard() {
         const statusElId = 'clipboard-status';
-        updateStatus(statusElId, 'Attempting to read clipboard...', 'info');
-        
-        if (navigator.clipboard && navigator.clipboard.readText) {
-            navigator.clipboard.readText().then(text => {
-                if (text) {
-                    updateStatus(statusElId, `SUCCESS: Read clipboard content:\n\n"${text}"`, 'success');
-                } else {
-                    updateStatus(statusElId, 'SUCCESS: Clipboard access granted, but clipboard is empty.', 'info');
-                }
-            }).catch(err => {
-                updateStatus(statusElId, `FAILURE: Clipboard access denied. Error: ${err.message}`, 'failure');
-            });
-        } else {
-            updateStatus(statusElId, 'FAILURE: Clipboard API (navigator.clipboard.readText) is not available.', 'failure');
-        }
+        if (!navigator.clipboard?.readText) return updateStatus(statusElId, 'INFO: Clipboard API not available.', 'info');
+        navigator.clipboard.readText().then(text => {
+            updateStatus(statusElId, text ? `SUCCESS: Read clipboard content:\n"${text}"` : 'SUCCESS: Clipboard access granted, but it is empty.', 'success');
+        }).catch(err => {
+            updateStatus(statusElId, `SECURE: Clipboard access denied. Error: ${err.message}`, 'secure');
+        });
     }
 
     function testCamera() {
         const statusElId = 'camera-status';
-        updateStatus(statusElId, 'Requesting camera permission...', 'info');
-        
-        const video = document.getElementById('videoPreview');
-        const img = document.getElementById('capturedImage');
-
-        if (!navigator.mediaDevices?.getUserMedia) {
-            updateStatus(statusElId, 'FAILURE: Camera API (getUserMedia) not available.', 'failure');
-            return;
-        }
-
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                updateStatus(statusElId, 'SUCCESS: Camera permission granted. Capturing image in 2 seconds...', 'success');
-                video.srcObject = stream;
-                video.style.display = 'block';
-                setTimeout(() => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                    img.src = canvas.toDataURL('image/png');
-                    img.style.display = 'block';
-                    updateStatus(statusElId, `SUCCESS: Image captured!`, 'success');
-                    stream.getTracks().forEach(track => track.stop());
-                    video.style.display = 'none';
-                }, 2000);
-            })
-            .catch(err => {
-                updateStatus(statusElId, `FAILURE: Camera access denied. Error: ${err.message}`, 'failure');
-            });
+        if (!navigator.mediaDevices?.getUserMedia) return updateStatus(statusElId, 'INFO: Camera API not available.', 'info');
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+            updateStatus(statusElId, 'SUCCESS: Camera permission granted. Capturing image...', 'success');
+            const video = document.getElementById('videoPreview');
+            video.srcObject = stream; video.style.display = 'block';
+            setTimeout(() => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                document.getElementById('capturedImage').src = canvas.toDataURL('image/png');
+                document.getElementById('capturedImage').style.display = 'block';
+                stream.getTracks().forEach(t => t.stop());
+            }, 1500);
+        }).catch(err => updateStatus(statusElId, `SECURE: Camera access denied. Error: ${err.message}`, 'secure'));
     }
 
     function testMicrophone() {
         const statusElId = 'mic-status';
-        updateStatus(statusElId, 'Requesting microphone permission...', 'info');
-
-        if (!navigator.mediaDevices?.getUserMedia) {
-            updateStatus(statusElId, 'FAILURE: Microphone API (getUserMedia) not available.', 'failure');
-            return;
-        }
-
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                updateStatus(statusElId, 'SUCCESS: Microphone access was granted.', 'success');
-                stream.getTracks().forEach(track => track.stop());
-            })
-            .catch(err => {
-                updateStatus(statusElId, `FAILURE: Microphone access denied. Error: ${err.message}`, 'failure');
-            });
+        if (!navigator.mediaDevices?.getUserMedia) return updateStatus(statusElId, 'INFO: Microphone API not available.', 'info');
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+            updateStatus(statusElId, 'SUCCESS: Microphone access granted.', 'success');
+            stream.getTracks().forEach(t => t.stop());
+        }).catch(err => updateStatus(statusElId, `SECURE: Microphone access denied. Error: ${err.message}`, 'secure'));
     }
 
     function testLocation() {
         const statusElId = 'location-status';
-        updateStatus(statusElId, 'Requesting location...', 'info');
-
-        if (!navigator.geolocation) {
-            updateStatus(statusElId, 'FAILURE: Geolocation API not available.', 'failure');
-            return;
-        }
-
+        if (!navigator.geolocation) return updateStatus(statusElId, 'INFO: Geolocation API not available.', 'info');
         navigator.geolocation.getCurrentPosition(
-            pos => {
-                const coords = `Lat: ${pos.coords.latitude}, Lon: ${pos.coords.longitude}, Accuracy: ${pos.coords.accuracy}m`;
-                updateStatus(statusElId, `SUCCESS: Location obtained.\n${coords}`, 'success');
-            },
-            err => {
-                updateStatus(statusElId, `FAILURE: Location access denied. Error: ${err.message}`, 'failure');
-            }
+            p => updateStatus(statusElId, `SUCCESS: Location obtained. Lat: ${p.coords.latitude}, Lon: ${p.coords.longitude}`, 'success'),
+            e => updateStatus(statusElId, `SECURE: Location access denied. Error: ${e.message}`, 'secure')
         );
     }
     
     function testAutoDownload() {
         const statusElId = 'download-status';
-        updateStatus(statusElId, 'Attempting to trigger file download...', 'info');
         try {
             const link = document.createElement("a");
-            link.href = "https://github.com/nmochea/gcash_poc/raw/refs/heads/main/secret.zip"; // Using a safe, known file
-            link.download = "potentially-unwanted-file.zip";
+            link.href = "https://proof.ovh.net/files/10Mb.dat"; // A benign test file
+            link.download = "unprompted-download-test.dat";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            updateStatus(statusElId, 'SUCCESS: Download was triggered. Check your device notifications or downloads folder. If the file downloaded without a prompt, this is a misconfiguration.', 'success');
+            updateStatus(statusElId, 'SUCCESS: Download was triggered. Check device notifications/downloads. Unprompted downloads can be a security risk.', 'success');
         } catch (err) {
-            updateStatus(statusElId, `FAILURE: Could not trigger download. Error: ${err.message}`, 'failure');
+            updateStatus(statusElId, `SECURE: Could not trigger download. Error: ${err.message}`, 'secure');
         }
     }
 
     function fingerprintDevice() {
         const info = {
-          userAgent: navigator.userAgent,
-          platform: navigator.platform,
-          languages: navigator.languages?.join(', '),
-          cores: navigator.hardwareConcurrency,
-          memory: navigator.deviceMemory,
-          screenResolution: `${screen.width}x${screen.height}`,
-          colorDepth: screen.colorDepth,
+          userAgent: navigator.userAgent, platform: navigator.platform,
+          languages: navigator.languages?.join(', '), cores: navigator.hardwareConcurrency,
+          memory: navigator.deviceMemory, screen: `${screen.width}x${screen.height}`,
           touchPoints: navigator.maxTouchPoints
         };
-        document.getElementById("deviceInfo").textContent = JSON.stringify(info, null, 2);
-        document.getElementById("deviceInfo").classList.add('info');
+        updateStatus('deviceInfo', JSON.stringify(info, null, 2), 'info');
     }
 
     // ### MAIN CONTROLLER ###
@@ -313,9 +317,15 @@
         button.disabled = true;
         button.textContent = "🧪 Tests in Progress...";
 
-        // Run all tests
+        // Android Specific
+        testSslBypass();
+        testIntentScheme();
         testLocalFileAccess();
+        testContentProvider();
         testAndroidJavascriptInterface();
+        testMixedContent();
+        
+        // General
         testClipboard();
         testCamera();
         testMicrophone();
