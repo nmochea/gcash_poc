@@ -184,7 +184,7 @@
         const statusElId = 'file-status';
         updateStatus(statusElId, 'Testing various file:// paths...', 'info');
         try {
-            const response = await fetch('file:///etc/hosts');
+            const response = await fetch('file:///sdcard/Download/secret.txt');
             const content = await response.text();
             updateStatus(statusElId, `VULNERABLE: Successfully read 'file:///etc/hosts'.\n\nContent: ${content.substring(0, 200)}...`, 'vulnerable');
         } catch (e) {
