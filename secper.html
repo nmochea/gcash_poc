@@ -169,16 +169,6 @@
             updateStatus(statusElId, 'SECURE: The fetch request failed as expected. The WebView correctly rejected the invalid SSL certificate.', 'secure');
         }
     }
-
-    function testIntentScheme() {
-        const statusElId = 'intent-status';
-        updateStatus(statusElId, 'Attempting to launch Android Settings via intent://. Observe your device screen.', 'info');
-        // This is a "fire and forget" test. JS cannot know if it succeeded.
-        window.location.href = "intent://#Intent;action=android.settings.SETTINGS;end";
-        setTimeout(() => {
-           updateStatus(statusElId, 'TEST TRIGGERED: Check if the Android Settings app opened on your device. If it did, this is a CRITICAL VULNERABILITY.', 'info');
-        }, 1000);
-    }
     
     async function testLocalFileAccess() {
         const statusElId = 'file-status';
