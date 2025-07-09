@@ -49,7 +49,7 @@
 <div class="container">
     <h1>🔬 Comprehensive Android WebView Security Tester</h1>
     <div class="note">
-        <strong>Important:</strong> A <strong style="color: #155724;">"SUCCESS"</strong> status for a test indicates a <strong style="color: #d9230f;">potential security vulnerability</strong> has been found. A <strong style="color: #721c24;">"SECURE"</strong> status means the test did not find a flaw.
+        <strong>Important:</strong> A <strong style="color: #155724;">"VULNERABLE"</strong> or <strong style="color: #155724;">"SUCCESS"</strong> status indicates a <strong style="color: #d9230f;">potential security vulnerability</strong> has been found. A <strong style="color: #721c24;">"SECURE"</strong> status means the test did not find a flaw.
     </div>
 
     <button id="start-button" onclick="runAllTests()">▶️ Start All Automated Tests</button>
@@ -62,33 +62,27 @@
         <p class="description">Attempts to fetch a resource from a domain with an invalid SSL certificate. <span class="impact">Impact: If successful, the app is vulnerable to Man-in-the-Middle (MITM) attacks, allowing interception of all traffic.</span> This is caused by `onReceivedSslError(handler.proceed())`.</p>
         <div id="ssl-status" class="status">Waiting for test to start...</div>
     </div>
-
-    <div class="test-section">
-        <h3>2. Insecure Intent Scheme (`intent://`)</h3>
-        <p class="description">Attempts to launch the main Android Settings app via an `intent://` URL. <span class="impact">Impact: If the Settings app opens, a malicious page can launch arbitrary activities, send broadcasts, or start services, leading to serious vulnerabilities.</span></p>
-        <div id="intent-status" class="status">Waiting for test to start...</div>
-    </div>
     
     <div class="test-section">
-        <h3>3. Local File Access (`file://`)</h3>
+        <h3>2. Local File Access (`file://`)</h3>
         <p class="description">Attempts to read sensitive local files via `fetch()`. <span class="impact">Impact: A critical vulnerability, allowing theft of local app data or device information.</span> Enabled by `setAllowFileAccessFromFileURLs(true)` or `setAllowUniversalAccessFromFileURLs(true)`.</p>
         <div id="file-status" class="status">Waiting for test to start...</div>
     </div>
 
     <div class="test-section">
-        <h3>4. Content Provider Access (`content://`)</h3>
+        <h3>3. Content Provider Access (`content://`)</h3>
         <p class="description">Attempts to read from a standard Android Content Provider. <span class="impact">Impact: Allows theft of data shared by other apps (e.g., contacts, user dictionary).</span> Enabled by `setAllowContentAccess(true)`.</p>
         <div id="content-status" class="status">Waiting for test to start...</div>
     </div>
     
     <div class="test-section">
-        <h3>5. JavascriptInterface Exploit</h3>
+        <h3>4. JavascriptInterface Exploit</h3>
         <p class="description">Tests for insecure Javascript Interfaces. <span class="impact">Impact: Can allow a malicious page to execute native Java code, potentially leading to full device compromise.</span></p>
         <div id="jsinterface-status" class="status">Waiting for test to start...</div>
     </div>
 
     <div class="test-section">
-        <h3>6. Mixed Content Loading</h3>
+        <h3>5. Mixed Content Loading</h3>
         <p class="description">Checks if an insecure resource (HTTP) can be loaded from this secure page (HTTPS). <span class="impact">Impact: Defeats the purpose of HTTPS, allowing an attacker to inject malicious scripts or sniff data on an otherwise secure page.</span></p>
         <div id="mixed-content-status" class="status">Waiting for test to start...</div>
     </div>
@@ -98,34 +92,34 @@
     <h2>General Permission & API Tests</h2>
 
     <div class="test-section">
-        <h3>7. Clipboard Access</h3>
+        <h3>6. Clipboard Access</h3>
         <div id="clipboard-status" class="status">Waiting for test to start...</div>
     </div>
 
     <div class="test-section">
-        <h3>8. Camera Access & Capture</h3>
+        <h3>7. Camera Access & Capture</h3>
         <div id="camera-status" class="status">Waiting for test to start...</div>
         <video id="videoPreview" autoplay playsinline></video>
         <img id="capturedImage" alt="Captured Image" />
     </div>
 
     <div class="test-section">
-        <h3>9. Microphone Access</h3>
+        <h3>8. Microphone Access</h3>
         <div id="mic-status" class="status">Waiting for test to start...</div>
     </div>
 
     <div class="test-section">
-        <h3>10. Geolocation</h3>
+        <h3>9. Geolocation</h3>
         <div id="location-status" class="status">Waiting for test to start...</div>
     </div>
     
     <div class="test-section">
-        <h3>11. Automatic File Download</h3>
+        <h3>10. Automatic File Download</h3>
         <div id="download-status" class="status">Waiting for test to start...</div>
     </div>
 
     <div class="test-section">
-        <h3>12. Device Fingerprinting</h3>
+        <h3>11. Device Fingerprinting</h3>
         <pre id="deviceInfo" class="status">Waiting for test to start...</pre>
     </div>
 
@@ -172,9 +166,10 @@
     
     async function testLocalFileAccess() {
         const statusElId = 'file-status';
-        updateStatus(statusElId, 'Testing various file:// paths...', 'info');
+        updateStatus(statusElId, 'Attempting to read file:///etc/hosts...', 'info');
         try {
-            const response = await fetch('file:///sdcard/Download/secret.txt');
+            // Using /etc/hosts as it's a standard, readable file on most Unix-like systems, including Android.
+            const response = await fetch('file:///etc/hosts');
             const content = await response.text();
             updateStatus(statusElId, `VULNERABLE: Successfully read 'file:///etc/hosts'.\n\nContent: ${content.substring(0, 200)}...`, 'vulnerable');
         } catch (e) {
@@ -184,11 +179,12 @@
 
     async function testContentProvider() {
         const statusElId = 'content-status';
-        updateStatus(statusElId, 'Attempting to read from content://user_dictionary/words...', 'info');
+        updateStatus(statusElId, 'Attempting to read from content://settings/system...', 'info');
         try {
-            const response = await fetch('content://user_dictionary/words');
+            // Using system settings as it's a common, often readable provider.
+            const response = await fetch('content://settings/system');
             const content = await response.text();
-            updateStatus(statusElId, `VULNERABLE: Successfully read from the User Dictionary content provider.\n\nContent: ${content.substring(0, 200)}...`, 'vulnerable');
+            updateStatus(statusElId, `VULNERABLE: Successfully read from the System Settings content provider.\n\nContent: ${content.substring(0, 200)}...`, 'vulnerable');
         } catch (e) {
             updateStatus(statusElId, 'SECURE: Could not read from content provider. The WebView correctly blocks content:// URLs.', 'secure');
         }
@@ -196,7 +192,7 @@
 
     function testAndroidJavascriptInterface() {
         const statusElId = 'jsinterface-status';
-        const commonInterfaces = ['Android', 'JSInterface', 'WebView', 'android', 'app'];
+        const commonInterfaces = ['Android', 'JSInterface', 'WebView', 'android', 'app', 'webkit'];
         let findings = [];
         for (const iface of commonInterfaces) {
             if (typeof window[iface] === 'object' && window[iface] !== null) {
@@ -229,7 +225,6 @@
         img.src = 'http://http.badssl.com/logo.png';
     }
 
-    // The rest of the functions from the previous version remain largely the same, just with updated messaging.
     function testClipboard() {
         const statusElId = 'clipboard-status';
         if (!navigator.clipboard?.readText) return updateStatus(statusElId, 'INFO: Clipboard API not available.', 'info');
@@ -309,7 +304,6 @@
 
         // Android Specific
         testSslBypass();
-        testIntentScheme();
         testLocalFileAccess();
         testContentProvider();
         testAndroidJavascriptInterface();
